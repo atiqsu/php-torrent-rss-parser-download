@@ -17,9 +17,11 @@ class Parser{
 	protected $curl;
 
 	function __construct(){
-		$this->regEx = '%(?<url>http://[\w'.preg_quote('%/?&._-','%').'])%ims';
+		$this->regEx = '%(?<url>http://[\w'.preg_quote('%/?&._-','%').']+)%ims';
 		$this->curl = new \GetContent\cSingleCurl();
 		$this->curl->setTypeContent('file');
+		$this->curl->setDefaultOption(CURLOPT_TIMEOUT, 10);
+		$this->curl->setDefaultOption(CURLOPT_FOLLOWLOCATION, true);
 	}
 
 	public function findUrl($text){
@@ -34,17 +36,32 @@ class Parser{
 
 	protected function prepareUrl(&$url){}
 
-	protected function checkFile($fileName){
-		if(preg_match('%\.torrent$%i',$fileName)){
+	protected function getFile($fileName){
+		$this->curl->setDefaultOption(CURLOPT_REFERER, $fileName);
+		$file = $this->curl->load($fileName);
+		if(!preg_match('%/(?<file_name>[^/]+\.torrent)($|/)%i',$fileName,$match)){
+			$descriptor = $this->curl->getDescriptor();
+			if(!isset($descriptor['info']['url']) || !preg_match('%/(?<file_name>[^/]+\.torrent)($|/)%i',$descriptor['info']['url'],$match)){
+				return false;
+			}
+		}
+		$torrentName = urldecode($match['file_name']);
+		return array('name' => $torrentName, 'file' => $file);
+	}
 
+	protected function saveFile($data){
+		if(!file_exists(DIR_FOR_TORRENT . $data['name'])){
+			file_put_contents(DIR_FOR_TORRENT . $data['name'], $data['file']);
 		}
 	}
 
 	public function download($urlRss){
 		$text = $this->curl->load($urlRss);
-		$urls = $this->findUrl($text);
-		foreach($urls as $url){
-
+		foreach($this->findUrl($text) as $url){
+			$info = $this->getFile($url);
+			if($info){
+				$this->saveFile($info);
+			}
 		}
 	}
 

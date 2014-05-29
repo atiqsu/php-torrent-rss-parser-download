@@ -9,10 +9,10 @@
 
 require_once dirname(__FILE__) . DIRECTORY_SEPARATOR . 'config.php';
 
-$feed = json_decode(FEED, true);
+$feed = json_decode(file_get_contents(FEED), true);
 
 foreach($feed as $url){
-	$domain = \GetContent\cStringWork::getDomainName($url);
+	$domain = \GetContent\cStringWork::getDomainName($url['rss']);
 	$class = getClassName($domain);
 	if(file_exists(MOD . $class . '.php')){
 		require_once MOD . $class . '.php';
@@ -20,9 +20,7 @@ foreach($feed as $url){
 	} else {
 		$obj = new Rss();
 	}
-
-
-
+	$obj->download($url['rss']);
 }
 
 function getClassName($url){

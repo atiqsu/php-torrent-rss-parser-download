@@ -31,7 +31,7 @@ if(isset($_REQUEST['action'])){
 	RSS: <input name="rss" type="text"><br/>
 	<input type="submit" value="Save">
 </form>
-<table>
+<table border="3">
 <tr>
 	<th>Description</th>
 	<th>RSS</th>
