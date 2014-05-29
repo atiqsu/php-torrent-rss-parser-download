@@ -7,8 +7,10 @@
  * Project: php-torrent-rss-parser-download
  * @author: Evgeny Pynykh bpteam22@gmail.com
  */
+define('ROOT_DIR', dirname(__FILE__) . DIRECTORY_SEPARATOR);
 define('DIR_FOR_TORRENT', '/mnt/myhdd/dropbox/torrent');
-define('CONFIG', dirname(__FILE__) . DIRECTORY_SEPARATOR .'feed.json');
-define('MOD', dirname(__FILE__) . DIRECTORY_SEPARATOR .'mod' . DIRECTORY_SEPARATOR);
+define('FEED', ROOT_DIR . 'feed.json');
+define('MOD', ROOT_DIR . 'mod' . DIRECTORY_SEPARATOR);
 
-require_once dirname(__FILE__) . DIRECTORY_SEPARATOR . '..' . DIRECTORY_SEPARATOR . '_coolLib' . DIRECTORY_SEPARATOR . 'loader-curl-phantomjs-proxy' . DIRECTORY_SEPARATOR . 'include.php';
+require_once ROOT_DIR . '..' . DIRECTORY_SEPARATOR . '_coolLib' . DIRECTORY_SEPARATOR . 'loader-curl-phantomjs-proxy' . DIRECTORY_SEPARATOR . 'include.php';
+require_once MOD . 'rss.php';

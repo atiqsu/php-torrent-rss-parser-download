@@ -8,7 +8,7 @@
  * @author: Evgeny Pynykh bpteam22@gmail.com
  */
 require_once dirname(__FILE__).DIRECTORY_SEPARATOR.'config.php';
-$data = json_decode(file_get_contents(CONFIG), true);
+$data = json_decode(file_get_contents(FEED), true);
 if(isset($_REQUEST['action'])){
 	$query = $_REQUEST;
 	switch($query['action']){
@@ -21,7 +21,7 @@ if(isset($_REQUEST['action'])){
 		default:
 			exit('WTF?');
 	}
-	file_put_contents(CONFIG, json_encode($data));
+	file_put_contents(FEED, json_encode($data));
 }
 ?>
 
