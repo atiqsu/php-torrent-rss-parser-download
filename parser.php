@@ -10,14 +10,13 @@
 
 class Parser{
 
-	protected $regEx;
+	protected $urlRegEx = '%(?<url>https?://[\w\%/\?&\._\-]+)%ims';
 	/**
 	 * @var \GetContent\cSingleCurl
 	 */
 	protected $curl;
 
 	function __construct(){
-		$this->regEx = '%(?<url>http://[\w'.preg_quote('%/?&._-','%').']+)%ims';
 		$this->curl = new \GetContent\cSingleCurl();
 		$this->curl->setTypeContent('file');
 		$this->curl->setDefaultOption(CURLOPT_TIMEOUT, 10);
@@ -25,7 +24,7 @@ class Parser{
 	}
 
 	public function findUrl($text){
-		if(preg_match_all($this->regEx,$text,$matches)){
+		if(preg_match_all($this->urlRegEx,$text,$matches)){
 			foreach($matches['url'] as &$url){
 				$this->prepareUrl($url);
 			}
@@ -36,16 +35,18 @@ class Parser{
 
 	protected function prepareUrl(&$url){}
 
-	protected function getFile($fileName){
+	protected final function getFile($fileName){
 		$this->curl->setDefaultOption(CURLOPT_REFERER, $fileName);
 		$file = $this->curl->load($fileName);
-		if(!preg_match('%/(?<file_name>[^/]+\.torrent)($|/)%i',$fileName,$match)){
+		$filePath = \GetContent\cStringWork::parsePath($fileName);
+		if(!preg_match('%torrent%i',$filePath['extension'])){
 			$descriptor = $this->curl->getDescriptor();
-			if(!isset($descriptor['info']['url']) || !preg_match('%/(?<file_name>[^/]+\.torrent)($|/)%i',$descriptor['info']['url'],$match)){
+			$filePath = \GetContent\cStringWork::parsePath($descriptor['info']['url']);
+			if(!preg_match('%torrent%i',$filePath['extension'])){
 				return false;
 			}
 		}
-		$torrentName = urldecode($match['file_name']);
+		$torrentName = urldecode($filePath['basename']);
 		return array('name' => $torrentName, 'file' => $file);
 	}
 
@@ -55,7 +56,7 @@ class Parser{
 		}
 	}
 
-	public function download($urlRss){
+	public final function download($urlRss){
 		$text = $this->curl->load($urlRss);
 		foreach($this->findUrl($text) as $url){
 			$info = $this->getFile($url);
